@@ -51,6 +51,8 @@ public:
 	void buildChamfer(double detect, ksEntityPtr pEntity, double size);
 	void buildBoss();
 	void buildKey();
+	void buildBossAssembly();
+	void buildMainAssebly();
 //	afx_msg void OnBnClickedOk();
 	afx_msg void OnBnClickedButton1();
 
