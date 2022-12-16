@@ -63,6 +63,8 @@ public:
 
 	double holeD = 10.0;
 	double holeDist = 15.0;
+
+	double offsetInAssembly = 12.0;
 };
 
 

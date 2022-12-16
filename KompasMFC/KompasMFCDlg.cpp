@@ -265,8 +265,52 @@ void CKompasMFCDlg::buildMain() {
 	buildChamfer(fieldd, pRotate, 1.5);
 	buildChamfer(fieldD, pRotate, 1.0);
 
+	ksEntityCollectionPtr flFaces = pPart->EntityCollection(o3d_face);
+
+	for (int i = 0; i < flFaces->GetCount(); i++)
+	{
+		ksEntityPtr face = flFaces->GetByIndex(i);
+		ksFaceDefinitionPtr def = face->GetDefinition();
 
 
+		if (def->GetOwnerEntity() == pRotate)
+		{
+			if (def->IsCylinder())
+			{
+				double h, r;
+				def->GetCylinderParam(&h, &r);
+				if (r == fieldd/2.0) {
+					face->Putname("2");
+					face->Update();
+
+				}
+			}
+
+			if (def->IsPlanar()) {
+				ksEdgeCollectionPtr col = def->EdgeCollection();
+
+				for (int k = 0; k < col->GetCount(); k++)
+				{
+					ksEdgeDefinitionPtr d = col->GetByIndex(k);
+
+					if (d->IsCircle())
+					{
+						ksVertexDefinitionPtr p1 = d->GetVertex(true);
+
+						double x1, y1, z1;
+
+						p1->GetPoint(&x1, &y1, &z1);
+						if (y1 == 0) {
+							face->Putname("22");
+							face->Update();
+						}
+					}
+				}
+			}
+		}
+
+
+	}
 
 	ksEntityPtr pSketch1 = pPart->NewEntity(o3d_sketch);
 
@@ -289,7 +333,7 @@ void CKompasMFCDlg::buildMain() {
 	p2DDoc->ksLineSeg(point1[0][0], point1[0][1], point1[1][0], point1[1][1], 1);
 
 	point1[2][0] = keyL/2.0;
-	point1[2][1] = sqrt(pow(fieldd/2.0, 2) - pow(keyL/2, 2)) + keyH / 2.0;
+	point1[2][1] = sqrt(pow(fieldd/2.0, 2) - pow(keyL/2, 2)) + keyH;
 
 	p2DDoc->ksLineSeg(point1[1][0], point1[1][1], point1[2][0], point1[2][1], 1);
 
@@ -401,7 +445,7 @@ void CKompasMFCDlg::buildBoss(){
 
 	pExtrude->Create();
 
-
+	
 
 
 
@@ -414,6 +458,8 @@ void CKompasMFCDlg::buildBoss(){
 	pPlaneDef->SetPlane(pPart->GetDefaultEntity(o3d_planeXOY));
 
 	pPlane->Create();
+
+
 
 
 	ksEntityPtr pSketch2 = pPart->NewEntity(o3d_sketch);
@@ -470,38 +516,38 @@ void CKompasMFCDlg::buildBoss(){
 
 
 
-	ksEntityCollectionPtr flFaces = pPart->EntityCollection(o3d_face);
+	ksEntityCollectionPtr flFaces1 = pPart->EntityCollection(o3d_face);
 
-	for (int i = 0; i < flFaces->GetCount(); i++)
+	for (int i = 0; i < flFaces1->GetCount(); i++)
 	{
-		ksEntityPtr face = flFaces->GetByIndex(i);
-		ksFaceDefinitionPtr def = face->GetDefinition();
+		ksEntityPtr face1 = flFaces1->GetByIndex(i);
+		ksFaceDefinitionPtr def1 = face1->GetDefinition();
 
 
-		if (def->GetOwnerEntity() == pExtrude1)
+		if (def1->GetOwnerEntity() == pExtrude1)
 		{
-			if (def->IsPlanar())
+			if (def1->IsPlanar())
 			{
-				face->Putname("BossFaceForKey");
-				face->Update();
+				face1->Putname("BossFaceForKey");
+				face1->Update();
 			}
 
-			if (def->IsCylinder()) {
-				ksEdgeCollectionPtr col = def->EdgeCollection();
-				for (int k = 0; k < col->GetCount(); k++)
+			if (def1->IsCylinder()) {
+				ksEdgeCollectionPtr col1 = def1->EdgeCollection();
+				for (int k = 0; k < col1->GetCount(); k++)
 				{
-					ksEdgeDefinitionPtr d = col->GetByIndex(k);
+					ksEdgeDefinitionPtr d1 = col1->GetByIndex(k);
 
-					if (d->IsArc())
+					if (d1->IsArc())
 					{
-						ksVertexDefinitionPtr p1 = d->GetVertex(true);
-						ksVertexDefinitionPtr p2 = d->GetVertex(false);
+						ksVertexDefinitionPtr p11 = d1->GetVertex(true);
+						ksVertexDefinitionPtr p21 = d1->GetVertex(false);
 						double x1, y1, z1;
 
-						p1->GetPoint(&x1, &y1, &z1);
+						p11->GetPoint(&x1, &y1, &z1);
 						if (abs(x1) < keyPosOffset + keyLL/2) {
-							face->Putname("BossFaceForKey2");
-							face->Update();
+							face1->Putname("BossFaceForKey2");
+							face1->Update();
 						}
 					}
 				}
@@ -662,7 +708,45 @@ void CKompasMFCDlg::buildBossAssembly() {
 	pDoc->AddMateConstraint(mc_Coincidence, BossFace4Assemly2, KeyFace4Assemly2, 1, 1, 0);
 	pDoc->RebuildDocument();
 
-	pDoc->SaveAs("D:\\Assembly\\BossAssem.a3d");
+	ksEntityCollectionPtr flFaces = pBoss->EntityCollection(o3d_face);
+	for (int i = 0; i < flFaces->GetCount(); i++)
+	{
+		ksEntityPtr face = flFaces->GetByIndex(i);
+		ksFaceDefinitionPtr def = face->GetDefinition();
+			if (def->IsCylinder())
+			{
+				double h, r;
+				def->GetCylinderParam(&h, &r);
+				if (h == fieldL) {
+					face->Putname("1");
+					face->Update();
+				}
+			}
+
+			if (def->IsPlanar()) {
+				ksEdgeCollectionPtr col = def->EdgeCollection();
+
+				for (int k = 0; k < col->GetCount(); k++)
+				{
+					ksEdgeDefinitionPtr d = col->GetByIndex(k);
+
+					if (d->IsCircle())
+					{
+						ksVertexDefinitionPtr p1 = d->GetVertex(true);
+
+						double x1, y1, z1;
+
+						p1->GetPoint(&x1, &y1, &z1);
+						if (x1 != -fieldL) {
+							face->Putname("11");
+							face->Update();
+						}
+					}
+				}
+			}
+	}
+
+	pDoc->SaveAs("D:\\Assembly\\BossAssem.m3d");
 
 }
 
@@ -673,9 +757,63 @@ void CKompasMFCDlg::buildMainAssebly() {
 
 	pPart = pDoc->GetPart(pTop_Part);
 
-	ksPartPtr pBoss, pKey;
-	pDoc->SetPartFromFile("D:\\Assembly\\BossAssem.a3d", pPart, true);
+	ksPartPtr pBossAssem, pCoup, pBoss, pBoss2, pBossAssem2;
+	pDoc->SetPartFromFile("D:\\Assembly\\BossAssem.m3d", pPart, true);
 	pDoc->SetPartFromFile("D:\\Assembly\\couplings.m3d", pPart, true);
+	pDoc->SetPartFromFile("D:\\Assembly\\BossAssem.m3d", pPart, true);
+
+
+
+	pBossAssem = pDoc->GetPart(0);
+	pBoss = pBossAssem->GetPart(0);
+
+	pBossAssem2 = pDoc->GetPart(2);
+	pBoss2 = pBossAssem2->GetPart(0);
+
+	pCoup = pDoc->GetPart(1);
+
+	ksEntityCollectionPtr col = pBoss->EntityCollection(o3d_face);
+	ksEntityPtr BossFace4Assemly00 = col->GetByName("1", true, true);
+
+
+	col = pCoup->EntityCollection(o3d_face);
+	ksEntityPtr CoupFace4Assemly00 = col->GetByName("2", true, true);
+
+	pDoc->AddMateConstraint(mc_Concentric, BossFace4Assemly00, CoupFace4Assemly00, 1, 1, 0);
+
+	pDoc->RebuildDocument();
+
+
+
+
+	col = pCoup->EntityCollection(o3d_face);
+	ksEntityPtr CoupFace4Assemly10 = col->GetByName("22", true, true);
+
+	col = pBoss->EntityCollection(o3d_face);
+	ksEntityPtr BossFace4Assemly11 = col->GetByName("11", true, true);
+	
+	pDoc->AddMateConstraint(mc_Distance, BossFace4Assemly11, CoupFace4Assemly10, 1, 1, fieldL/2.0 + offsetInAssembly / 2.0);
+
+	pDoc->RebuildDocument();
+
+
+
+
+
+
+
+	ksEntityCollectionPtr col2 = pBoss2->EntityCollection(o3d_face);
+	ksEntityPtr BossFace4Assemly20 = col2->GetByName("1", true, true);
+	pDoc->AddMateConstraint(mc_Concentric, BossFace4Assemly20, CoupFace4Assemly00, -1, 1, 0);
+	pDoc->RebuildDocument();
+
+	ksEntityPtr BossFace4Assemly31 = col2->GetByName("11", true, true);
+	pDoc->AddMateConstraint(mc_Distance, BossFace4Assemly31, CoupFace4Assemly10, -1, 1, -(fieldL / 2.0 - offsetInAssembly / 2.0));
+	pDoc->RebuildDocument();
+
+	pDoc->SaveAs("D:\\Assembly\\MainAssembly.m3d");
+	pDoc->SaveAs("D:\\Assembly\\MainAssembly.stl");
+
 }
 void CKompasMFCDlg::OnBnClickedButton1()
 {
